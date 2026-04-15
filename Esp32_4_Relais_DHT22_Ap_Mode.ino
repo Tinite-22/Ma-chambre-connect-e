@@ -9,7 +9,7 @@
 // Le SSID est le nom public qui sera visible lors de la recherche de réseaux sur ton smartphone.
 const char* ssidAP = "Mon_ESP32_Dashboard"; 
 // Clé de sécurité WPA2 (Doit impérativement contenir au moins 8 caractères pour être valide).
-const char* passwordAP = "";
+const char* passwordAP = "";//Mettez ici le mot de passe que vous voulez utuliser pour votre réseaux.
 
 // Instanciation de l'objet WebServer. Le port 80 est le port standard pour le trafic HTTP non sécurisé.
 WebServer server(80);
