@@ -9,6 +9,23 @@ Ce projet est un système domotique local et autonome conçu autour d'un microco
 * **Contrôle de l'éclairage :** Pilotage indépendant de quatre lampes (ou autres appareils électriques) par l'intermédiaire d'un module relais à quatre canaux, avec un retour d'état visuel sur l'interface.
 * **Surveillance environnementale :** Mesure et affichage en temps réel de la température et du taux d'humidité de la pièce grâce à un capteur de précision DHT22.
 * **Suivi d'activité :** Un journal d'événements intégré à la page web permet de visualiser l'historique des actions effectuées sur les lampes en direct.
+## Architecture et Fonctionnement du Système
+
+L'infrastructure de ce projet repose sur la polyvalence du microcontrôleur ESP32, qui opère simultanément sur quatre niveaux logiques et matériels distincts :
+
+**1. Mode Point d'Accès (Access Point - AP)**
+Le système est conçu pour fonctionner en totale autarcie. L'ESP32 est configuré en mode AP, ce qui signifie qu'il agit comme son propre routeur réseau. Il génère un réseau Wi-Fi local auquel le client (smartphone ou ordinateur) se connecte directement. Cette topologie garantit que l'installation reste pilotable de manière ininterrompue, indépendamment de toute box internet ou d'infrastructures réseau externes.
+
+**2. Serveur Web Embarqué et Optimisation Mémoire**
+Une fois la connexion physique établie, l'ESP32 fait office de serveur web (port 80). Lorsqu'un client se connecte à l'adresse IP locale (généralement 192.168.4.1), le microcontrôleur distribue l'interface utilisateur. Le code source de l'interface (HTML, CSS, Vanilla JS) est stocké de manière contiguë dans la mémoire Flash du microcontrôleur grâce à la directive `PROGMEM`. Cette architecture préserve la mémoire vive (SRAM), qui reste disponible pour l'exécution dynamique des tâches.
+
+**3. Routage API et Communication Asynchrone**
+L'interaction entre l'interface utilisateur et le matériel est gérée par des requêtes asynchrones. Le serveur web embarqué expose des endpoints d'API (ex: `/api/lampe` et `/api/capteurs`). L'interface client utilise l'API Fetch (JavaScript) pour interroger ou commander ces terminaux en arrière-plan. Cela permet une mise à jour des données environnementales et un contrôle des actionneurs en temps réel, sans aucun rechargement de la page web.
+
+**4. Interfaçage Matériel (Contrôle et Acquisition)**
+Le code effectue la traduction entre les requêtes logicielles et les états électriques :
+* **Commande de puissance :** La réception d'une requête d'allumage déclenche la mise à l'état BAS (`LOW`) de la broche GPIO correspondante. Cela active le canal du module relais, fermant le circuit de puissance de la lampe de manière électriquement isolée.
+* **Acquisition de données :** Pour la surveillance environnementale, l'ESP32 interroge le capteur DHT22 sur une broche numérique dédiée, convertit les variations du signal analogique en valeurs flottantes de température et d'humidité, puis les sérialise au format JSON pour transmission au client web.
 
 ## Technologies et matériel utilisés
 ### Matériel
