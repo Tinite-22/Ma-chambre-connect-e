@@ -248,7 +248,7 @@ const char index_html[] PROGMEM = R"=====(
     </div>
     <div class="signature">
         Dashboard ESP32 &copy; 2026 - Conçu par 
-        <a href="https://github.com/Tinite-22 target="_blank">Low_Cost_Ingenieur</a>
+        <a href="https://github.com/Tinite-22" target="_blank">Low_Cost_Ingenieur</a>
     </div>
 
     <script>
