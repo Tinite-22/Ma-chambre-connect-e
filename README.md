@@ -1,38 +1,82 @@
-# Projet : Ma chambre connectée
+# Ma chambre connectée : Tableau de Bord IoT Autonome
 
-## Description générale
-Ce projet est un système domotique local et autonome conçu autour d'un microcontrôleur ESP32. Son objectif est de transformer une chambre classique en un environnement interactif, contrôlable à distance depuis un smartphone ou un ordinateur. La particularité de ce système est qu'il fonctionne en totale indépendance : il ne nécessite ni connexion à une box internet, ni abonnement à un service cloud externe, garantissant ainsi une réactivité immédiate et une confidentialité totale des données.
+![Platform: ESP32](https://img.shields.io/badge/Platform-ESP32-blue?style=for-the-badge&logo=espressif)
+![Language: C++](https://img.shields.io/badge/Language-C++-green?style=for-the-badge&logo=c%2B%2B)
+![Protocol: HTTP](https://img.shields.io/badge/Protocol-HTTP-orange?style=for-the-badge)
 
-## Architecture et Fonctionnement du Système
+Une solution domotique légère, robuste et "low-cost" pour le contrôle d'équipements électriques et le suivi environnemental. Ce projet transforme un microcontrôleur ESP32 en un **Point d'Accès Wi-Fi (AP)** autonome qui héberge un tableau de bord web moderne et réactif. Il permet de piloter 4 relais et de lire un capteur DHT22 en temps réel, sans nécessiter de connexion internet ou de routeur externe.
 
-L'infrastructure de ce projet repose sur la polyvalence du microcontrôleur ESP32, qui opère simultanément sur quatre niveaux logiques et matériels distincts :
+---
 
-**1. Mode Point d'Accès (Access Point - AP)**
-Le système est conçu pour fonctionner en totale autarcie. L'ESP32 est configuré en mode AP, ce qui signifie qu'il agit comme un routeur. Il génère un réseau Wi-Fi local auquel le client (smartphone ou ordinateur) se connecte directement. Cette topologie garantit que l'installation reste pilotable de manière ininterrompue, indépendamment de toute box internet ou d'infrastructures réseau externes.
+## Fonctionnalités Clés
 
-**2. Serveur Web Embarqué et Optimisation Mémoire**
-Une fois la connexion physique établie, l'ESP32 fait office de serveur web (port 80). Lorsqu'un client se connecte à l'adresse IP locale (généralement 192.168.4.1), le microcontrôleur distribue l'interface utilisateur. Le code source de l'interface (HTML, CSS, Vanilla JS) est stocké de manière contiguë dans la mémoire Flash du microcontrôleur grâce à la directive `PROGMEM`. Cette architecture préserve la mémoire vive (SRAM), qui reste disponible pour l'exécution dynamique des tâches.
+- **Réseau Local Dédié :** Configure l'ESP32 en mode Point d'Accès (Access Point) avec sécurité WPA2. Idéal pour les zones isolées ou les réseaux locaux sécurisés.
+- **Mesures en Temps Réel :** Collecte et affichage dynamique de la température et de l'humidité via un capteur DHT22 (rappel toutes les 5 secondes).
+- **Contrôle Quad-Relais :** Interface de commutation pour 4 charges électriques (lampes, moteurs, etc.) avec retour visuel immédiat.
+- **Optimisation de la RAM :** Intégration complète de l'interface UI (HTML/CSS/JS) dans la mémoire Flash du processeur via la directive `PROGMEM`.
+- **Journal d'Activité Intégré :** Un historique interactif côté client affiche en continu le statut des commandes et les erreurs de communication réseau.
 
-**3. Routage API et Communication Asynchrone**
-L'interaction entre l'interface utilisateur et le matériel est gérée par des requêtes asynchrones. Le serveur web embarqué expose des endpoints d'API (ex: `/api/lampe` et `/api/capteurs`). L'interface client utilise l'API Fetch (JavaScript) pour interroger ou commander ces terminaux en arrière-plan. Cela permet une mise à jour des données environnementales et un contrôle des actionneurs en temps réel, sans aucun rechargement de la page web.
+---
 
-**4. Interfaçage Matériel (Contrôle et Acquisition)**
-Le code effectue la traduction entre les requêtes logicielles et les états électriques :
-* **Commande de puissance :** La réception d'une requête d'allumage déclenche la mise à l'état BAS (`LOW`) de la broche GPIO correspondante. Cela active le canal du module relais, fermant le circuit de puissance de la lampe de manière électriquement isolée.
-* **Acquisition de données :** Pour la surveillance environnementale, l'ESP32 interroge le capteur DHT22 sur une broche numérique dédiée, convertit les variations du signal analogique en valeurs flottantes de température et d'humidité, puis les sérialise au format JSON pour transmission au client web.
+## Configuration Matérielle (Branchements)
 
-## Technologies et matériel utilisés
-### Matériel
-* Carte de développement ESP32 (ex: NodeMCU ESP-WROOM-32)
-* Capteur de température et d'humidité DHT22
-* Module relais 4 voies
-* Composants d'éclairage et alimentation externe
+| Composant | Broche ESP32 (GPIO) | Type | Description |
+| :--- | :--- | :--- | :--- |
+| **Capteur DHT22** | GPIO 4 | Entrée | Capteur de Température & Humidité |
+| **Relais 1 (Lampe 1)** | GPIO 26 | Sortie | Commande du premier relais    |
+| **Relais 2 (Lampe 2)** | GPIO 27 | Sortie | Commande du deuxième relais   |
+| **Relais 3 (Lampe 3)** | GPIO 14 | Sortie | Commande du troisième relais  |
+| **Relais 4 (Lampe 4)** | GPIO 12 | Sortie | Commande du quatrième relais  |
 
-### Logiciel
-* Programmation en C++ (via l'IDE Arduino)
-* Interface web développée en HTML, CSS et JavaScript pur
-* Utilisation de PROGMEM pour l'optimisation de la mémoire
-* Communication par requêtes asynchrones (Fetch API) pour une interface fluide sans rechargement de page
+---
 
-## Objectif pédagogique
-Ce projet démontre l'intégration réussie de plusieurs disciplines : l'électronique de contrôle (interfaçage de capteurs et commande de puissance), la programmation réseau (création d'un serveur web embarqué) et le développement web front-end (création d'une interface responsive et moderne stockée de manière optimisée).
+## Installation et Déploiement
+
+### 1. Prérequis Logiciels
+- **IDE Arduino** ou **PlatformIO**
+- Instalation de la carte**ESP32** dans l'IDE Arduino
+- Bibliothèques requises (disponibles dans le gestionnaire de bibliothèques) :
+  - `DHT sensor library` par Adafruit
+  - `Adafruit Unified Sensor`
+
+### 2. Personnalisation du Code
+Avant de téléverser le code, définissez le mot de passe de votre réseau Wi-Fi autonome à la ligne 12 :
+```cpp
+const char* motDePasseAP = "MON_MOT_DE_PASSE_SECURISE"; // Minimum 8 caractères
+
+```
+
+### 3. Téléversement
+
+1. Connectez votre carte ESP32 à l'ordinateur.
+2. Sélectionnez le modèle de carte approprié (ex: `DOIT ESP32 DEVKIT V1/ Esp32 Dev Module`).
+3. Compilez et téléversez le croquis.
+4. Ouvrez le Moniteur Série (vitesse `115200 bauds`) pour confirmer le lancement du serveur.
+
+---
+
+##  Guide d'Utilisation
+
+1. **Connexion :** Activez le Wi-Fi sur votre smartphone ou PC, puis connectez-vous au réseau nommé `Mon_Tableau_de_Bord_ESP32`.
+2. **Accès au Dashboard :** Lancez votre navigateur web favori et entrez l'adresse IP par défaut : `http://192.168.4.1`
+3. **Contrôle :** Utilisez les boutons **ON** et **OFF** pour commuter instantanément les relais matériels.
+
+---
+
+## Architecture du Code & Fonctionnement (Deep Dive)
+
+Le projet utilise une architecture **API REST asynchrone** permettant une interaction fluide sans rechargement de page :
+
+* **Le Frontend (Single Page Application) :** Conçu en HTML5, CSS3 (avec support Responsive Design pour mobiles) et JavaScript moderne. L'application utilise l'API native `fetch()` pour émettre des requêtes en arrière-plan vers l'ESP32.
+* **Les Points d'Accès API (Endpoints C++) :**
+* `GET /` : Appelle la fonction `gererRacine()` pour envoyer le fichier d'interface stocké dans la mémoire Flash.
+* `GET /api/lampe?id=X&etat=Y` : Extrait les paramètres de requêtes et applique l'état électrique sur le tableau de broches. Notez que la logique est configurée en **Active Low** (l'état `LOW` active le relais), ce qui correspond à la majorité des modules de relais du marché.
+* `GET /api/capteurs` : Effectue une vérification de la validité de la lecture matérielle à l'aide de la fonction `isnan()`. Si la lecture est valide, elle assemble et renvoie une chaîne au format structuré **JSON** : `{"temperature": XX.XX, "humidite": YY.YY}`.
+
+
+
+---
+
+## 👤 Auteur
+
+**Bignon Codjia**
