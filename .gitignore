@@ -1,0 +1,8 @@
+.pio/
+.vscode/
+build/
+bin/
+*.local
+*.swp
+*~
+.DS_Store
